@@ -54,13 +54,32 @@ fn convert_to_clipspace(x: f32, y: f32, vertices: [(f32, f32); 3]) -> [(f32, f32
 
 fn create_map(x: f32, y: f32) -> Vec<Vec<char>> {
     println!("x{:?} y{:?}", x, y);
-    let map: Vec<Vec<char>> = vec![vec![' '; x as usize + 1]; y as usize + 1];
+    let map: Vec<Vec<char>> = vec![vec![' '; x as usize]; y as usize];
     map
 }
 
 fn calc_vert(vertices: [(f32, f32); 3], x: f32, y: f32, mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
     for coord in vertices {
-        map[y as usize - coord.1 as usize][coord.0 as usize] = 'X';
+        println!("coord: {:?}", coord);
+        println!("coord.0 {:?} \n coord.1 {:?}", coord.0, coord.1);
+        let coord_real: (u32, u32) = (coord.0 as u32, coord.1 as u32);
+        match coord_real {
+            (a, b) if a == x as u32 && b == y as u32 => {
+                map[y as usize - (coord.1 as usize + 1)][coord.0 as usize + 1] = 'X';
+            }
+            (0, 0) => {
+                map[(y as usize - 1) - coord.1 as usize][coord.0 as usize] = 'X';
+            }
+            (0, _) => {
+                map[(y as usize - 1) - coord.1 as usize][coord.0 as usize] = 'X';
+            }
+            (_, 0) => {
+                map[y as usize - coord.1 as usize - 1][coord.0 as usize - 1] = 'X';
+            }
+            (_, _) => {
+                map[y as usize - coord.1 as usize][coord.0 as usize] = 'X';
+            }
+        }
     }
 
     map
