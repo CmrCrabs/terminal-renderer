@@ -1,5 +1,9 @@
-use termion::clear;
+use std::{thread::sleep, time::Duration};
 use termion::terminal_size;
+use termion::{
+    clear,
+    cursor::{Goto, Hide},
+};
 
 fn main() {
     // get triangle coords
@@ -10,21 +14,18 @@ fn main() {
     let (mut x, mut y) = get_dimensions();
 
     let vertices: [(f32, f32); 3] = convert_to_clipspace(x, y, initial_vertices);
-    println!("{:?}", vertices);
     // create a grid for the screensize to be outputted
-    let mut map: Vec<Vec<char>> = create_map(x, y);
+    let mut map: Vec<Vec<char>>;
 
     //render(&map);
 
+    println!("{}{}{}", clear::All, Goto(1, 1), Hide);
     loop {
         (x, y) = get_dimensions();
         map = create_map(x, y);
         map = calc_vert(vertices, x, y, map);
         render(&map);
-        println!("{}", clear::All);
     }
-
-    //render(map);
 
     // calculate vertex position
     // calculate the lines position
@@ -59,6 +60,10 @@ fn create_map(x: f32, y: f32) -> Vec<Vec<char>> {
 fn calc_vert(vertices: [(f32, f32); 3], x: f32, y: f32, mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
     for coord in vertices {
         let coord_real: (u32, u32) = (coord.0 as u32, coord.1 as u32);
+        if coord.1 > y || coord.0 >= x {
+            return map;
+        }
+
         match coord_real {
             (a, b) if a == x as u32 && b == y as u32 => {
                 map[y as usize - (coord.1 as usize + 1)][coord.0 as usize + 1] = 'X';
@@ -70,10 +75,10 @@ fn calc_vert(vertices: [(f32, f32); 3], x: f32, y: f32, mut map: Vec<Vec<char>>)
                 map[(y as usize - 1) - coord.1 as usize][coord.0 as usize] = 'X';
             }
             (_, 0) => {
-                map[y as usize - coord.1 as usize][coord.0 as usize - 1] = 'X';
+                map[y as usize - coord.1 as usize - 1][coord.0 as usize - 1] = 'X';
             }
             (_, _) => {
-                map[y as usize - coord.1 as usize][coord.0 as usize] = 'X';
+                map[(y as usize) - coord.1 as usize][coord.0 as usize] = 'X';
             }
         }
     }
@@ -86,9 +91,12 @@ fn calc_frag() {}
 fn create_tri() {}
 
 fn render(map: &Vec<Vec<char>>) {
+    println!("\n{}{}", Hide, Goto(1, 1));
     for row in map {
         for pixel in row {
             print!("{}", pixel);
         }
     }
+    sleep(Duration::from_millis(17));
+    println!("{}", clear::AfterCursor);
 }
