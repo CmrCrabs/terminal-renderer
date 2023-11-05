@@ -6,33 +6,26 @@ use termion::{
 };
 
 fn main() {
-    // get triangle coords
     let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
 
-    //  x y aixis flipped
-
-    let (mut x, mut y) = get_dimensions();
-
-    let vertices: [(f32, f32); 3] = convert_to_clipspace(x, y, initial_vertices);
-    // create a grid for the screensize to be outputted
+    let (mut x, mut y);
+    let mut vertices: [(f32, f32); 3];
     let mut map: Vec<Vec<char>>;
 
-    //render(&map);
-
-    println!("{}{}{}", clear::All, Goto(1, 1), Hide);
     loop {
+        sleep(Duration::from_millis(17));
         (x, y) = get_dimensions();
+        vertices = convert_to_clipspace(x, y, initial_vertices);
         map = create_map(x, y);
         map = calc_vert(vertices, x, y, map);
+
+        print!("{}{}", Hide, Goto(1, 1));
         render(&map);
     }
-
-    // calculate vertex position
-    // calculate the lines position
-    // calculte fragment
-    // combine into 1
-    // output triangle to terminal
 }
+
+// CURRENT PROBLEMS
+// final branch of match staement does not work
 
 fn get_dimensions() -> (f32, f32) {
     let (f, r) = terminal_size().unwrap();
@@ -60,9 +53,6 @@ fn create_map(x: f32, y: f32) -> Vec<Vec<char>> {
 fn calc_vert(vertices: [(f32, f32); 3], x: f32, y: f32, mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
     for coord in vertices {
         let coord_real: (u32, u32) = (coord.0 as u32, coord.1 as u32);
-        if coord.1 > y || coord.0 >= x {
-            return map;
-        }
 
         match coord_real {
             (a, b) if a == x as u32 && b == y as u32 => {
@@ -91,12 +81,9 @@ fn calc_frag() {}
 fn create_tri() {}
 
 fn render(map: &Vec<Vec<char>>) {
-    println!("\n{}{}", Hide, Goto(1, 1));
     for row in map {
         for pixel in row {
             print!("{}", pixel);
         }
     }
-    sleep(Duration::from_millis(17));
-    println!("{}", clear::AfterCursor);
 }
