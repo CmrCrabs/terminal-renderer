@@ -6,15 +6,15 @@ use termion::{
 };
 
 fn main() {
-    // let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
-    let initial_vertices: [(f32, f32); 3] = [(0.5, 0.8), (0.2, 0.2), (0.8, 0.2)];
+    let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
+    // let initial_vertices: [(f32, f32); 3] = [(0.5, 0.8), (0.2, 0.2), (0.8, 0.2)];
 
     let (mut x, mut y);
     let mut vertices: [(f32, f32); 3];
     let mut map: Vec<Vec<char>>;
 
     loop {
-        sleep(Duration::from_millis(200));
+        sleep(Duration::from_millis(1));
         (x, y) = get_dimensions();
         vertices = convert_to_clipspace(x, y, initial_vertices);
         map = create_map(x, y);
@@ -152,24 +152,22 @@ fn calc_line(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
 }
 
 fn calc_fill(mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
-    // loop each y axis line
-    // go through each character until find x
-    // for each pixel form that point change to x until found another x
-    // go to next line!
     let mut real = false;
+
     for line in 0..(map.len() - 1) {
-        for pixel in 0..map[line].len() {
-            match map[line][pixel] {
-                'X' => {
-                    real ^= true;
-                }
-                _ => {}
+        for pixel in 0..(map[line].len() - 1) {
+            if map[line][pixel] == 'X' {
+                real ^= true;
             }
-            if real {
-                map[line][pixel + 1] = 'X';
+            if real == true && map[line][pixel] != 'X' {
+                map[line][pixel] = 'X'
             }
         }
     }
+
+    // go thru every pixel till find 1 with x in it
+    // when x found, change bool
+    // if bool is true & pixel != x then pixel = X
 
     map
 }
