@@ -6,19 +6,21 @@ use termion::{
 };
 
 fn main() {
-    let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
+    // let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
+    let initial_vertices: [(f32, f32); 3] = [(0.5, 0.8), (0.2, 0.2), (0.8, 0.2)];
 
     let (mut x, mut y);
     let mut vertices: [(f32, f32); 3];
     let mut map: Vec<Vec<char>>;
 
     loop {
-        sleep(Duration::from_millis(1));
+        sleep(Duration::from_millis(200));
         (x, y) = get_dimensions();
         vertices = convert_to_clipspace(x, y, initial_vertices);
         map = create_map(x, y);
         map = calc_vert(vertices, x, y, map);
         map = calc_line(map, vertices);
+        map = calc_fill(map);
 
         print!("{}{}", Hide, Goto(1, 1));
         render(&map);
@@ -113,7 +115,6 @@ fn calc_line(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
         let gradient: f32 = y_jump as f32 / x_jump as f32;
         let mut pos_coord: (f32, f32) = initial_coord;
 
-        // will refactor later into less disgusting i swear
         if initial_coord.1 < next_coord.1 && initial_coord.0 > next_coord.0 {
             for _i in 0..(x_jump - 2) as u32 {
                 pos_coord = (pos_coord.0 - 1.0, pos_coord.1 + gradient as f32);
@@ -150,7 +151,28 @@ fn calc_line(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
     map
 }
 
-fn calc_fill() {}
+fn calc_fill(mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
+    // loop each y axis line
+    // go through each character until find x
+    // for each pixel form that point change to x until found another x
+    // go to next line!
+    let mut real = false;
+    for line in 0..(map.len() - 1) {
+        for pixel in 0..map[line].len() {
+            match map[line][pixel] {
+                'X' => {
+                    real ^= true;
+                }
+                _ => {}
+            }
+            if real {
+                map[line][pixel + 1] = 'X';
+            }
+        }
+    }
+
+    map
+}
 
 fn render(map: &Vec<Vec<char>>) {
     for row in map {
