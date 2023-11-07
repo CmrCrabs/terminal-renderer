@@ -20,7 +20,7 @@ fn main() {
         map = create_map(x, y);
         map = calc_vert(vertices, x, y, map);
         map = calc_line(map, vertices);
-        map = calc_fill(map);
+        // map = calc_fill(map);
 
         print!("{}{}", Hide, Goto(1, 1));
         render(&map);
@@ -151,7 +151,7 @@ fn calc_line(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
     map
 }
 
-fn calc_fill(mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
+fn calc_fillreal(mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
     let mut real = false;
 
     for line in 0..(map.len() - 1) {
@@ -164,11 +164,29 @@ fn calc_fill(mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
             }
         }
     }
+    map
+}
 
-    // go thru every pixel till find 1 with x in it
-    // when x found, change bool
-    // if bool is true & pixel != x then pixel = X
+fn calc_fill(mut map: Vec<Vec<char>>) -> Vec<Vec<char>> {
+    let mut real = false;
 
+    for line in 0..(map.len() - 1) {
+        for pixel in 0..(map[line].len() - 1) {
+            match map[line][pixel] {
+                ' ' if real == false => {}
+                ' ' if real == true => {
+                    map[line][pixel] = 'X';
+                }
+                'X' if real == false => {
+                    real = true;
+                }
+                'X' if real == true => {
+                    real = false;
+                }
+                _ => {}
+            }
+        }
+    }
     map
 }
 
