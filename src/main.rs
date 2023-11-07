@@ -1,4 +1,3 @@
-use std::f64::consts::PI;
 use std::{thread::sleep, time::Duration};
 use termion::cursor::{Goto, Hide};
 use termion::terminal_size;
@@ -18,12 +17,9 @@ fn main() {
         (x, y) = get_dimensions();
         clipspace_vertices = transform_coord(clipspace_vertices);
         vertices = convert_to_clipspace(x, y, clipspace_vertices);
-        //println!("{:?}", vertices);
 
-        //println!("{:?}", vertices);
         map = create_map(x, y);
 
-        //println!("{:?}", vertices);
         map = rasterise(map, vertices);
         print!("{}{}", Hide, Goto(1, 1));
         render(&map);
@@ -88,20 +84,15 @@ fn rasterise(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
 
 fn transform_coord(mut vertices: [(f32, f32); 3]) -> [(f32, f32); 3] {
     let rot_point: (f32, f32) = (0.5, 0.5);
-    //println!("rot point {:?}", rot_point);
     let mut i = 0;
     for coord in vertices {
         let deg: f32 = 0.000698;
         let initial_coord: (f32, f32) = (coord.0 - rot_point.0, coord.1 - rot_point.1);
-        //println!("initial coord: {:?}", initial_coord);
         let mut final_coord: (f32, f32) = (
             (initial_coord.0 * deg.cos() + initial_coord.1 * -deg.sin()),
             (initial_coord.0 * deg.sin() + initial_coord.1 * deg.cos()),
         );
-        //println!("final coord 1 {:?}", final_coord);
         final_coord = (final_coord.0 + rot_point.0, final_coord.1 + rot_point.1);
-
-        //println!("final coord 2 {:?}", final_coord);
 
         vertices[i] = final_coord;
         i = i + 1;
