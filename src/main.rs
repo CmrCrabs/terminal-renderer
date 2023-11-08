@@ -1,10 +1,18 @@
-use std::{thread::sleep, time::Duration};
 use termion::cursor::{Goto, Hide};
 use termion::terminal_size;
 
+const THING: char = 'X';
+const OTHER_THING: char = ' ';
+
 fn main() {
     // let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
-    let initial_vertices: [(f32, f32); 3] = [(0.5, 0.8), (0.2, 0.2), (0.8, 0.2)];
+    // let initial_vertices: [(f32, f32); 3] = [(0.5, 0.8), (0.2, 0.2), (0.8, 0.2)];
+
+    let initial_vertices: [(f32, f32); 3] = [
+        (0.2 * 0.8, 0.2),
+        (0.8 * 0.8, 0.2),
+        (0.5 * 0.8, 0.2 + (0.27 as f32).sqrt()),
+    ];
     let mut clipspace_vertices: [(f32, f32); 3] = initial_vertices;
 
     let (mut x, mut y);
@@ -12,8 +20,6 @@ fn main() {
     let mut map: Vec<Vec<char>>;
 
     loop {
-        sleep(Duration::from_millis(1));
-
         (x, y) = get_dimensions();
         clipspace_vertices = transform_coord(clipspace_vertices);
         vertices = convert_to_clipspace(x, y, clipspace_vertices);
@@ -45,7 +51,7 @@ fn convert_to_clipspace(x: f32, y: f32, vertices: [(f32, f32); 3]) -> [(f32, f32
 }
 
 fn create_map(x: f32, y: f32) -> Vec<Vec<char>> {
-    let map: Vec<Vec<char>> = vec![vec![' '; x as usize]; y as usize];
+    let map: Vec<Vec<char>> = vec![vec![THING; x as usize]; y as usize];
     map
 }
 
@@ -75,7 +81,7 @@ fn rasterise(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
             }
 
             if count == 3 {
-                map[l][p] = 'X';
+                map[l][p] = OTHER_THING;
             }
         }
     }
