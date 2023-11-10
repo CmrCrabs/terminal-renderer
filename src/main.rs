@@ -1,32 +1,39 @@
 use termion::cursor::{Goto, Hide};
 use termion::terminal_size;
 
-const THING: char = 'X';
-const OTHER_THING: char = ' ';
+const THING: char = ' ';
+const OTHER_THING: char = '󰝤';
 
 fn main() {
-    // let initial_vertices: [(f32, f32); 3] = [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)];
-    // let initial_vertices: [(f32, f32); 3] = [(0.5, 0.8), (0.2, 0.2), (0.8, 0.2)];
-
-    let initial_vertices: [(f32, f32); 3] = [
+    let mut _initial_vertices: [(f32, f32); 3] = [
         (0.2 * 0.8, 0.2),
         (0.8 * 0.8, 0.2),
         (0.5 * 0.8, 0.2 + (0.27 as f32).sqrt()),
     ];
-    let mut clipspace_vertices: [(f32, f32); 3] = initial_vertices;
+
+    let mut triangle1_vertices: [(f32, f32); 3] =
+        [(0.25 * 0.8, 0.5), (0.1 * 0.8, 0.2), (0.4 * 0.8, 0.2)];
+
+    let mut triangle2_vertices: [(f32, f32); 3] =
+        [(0.75 * 0.8, 0.5), (0.6 * 0.8, 0.2), (0.9 * 0.8, 0.2)];
 
     let (mut x, mut y);
-    let mut vertices: [(f32, f32); 3];
+    let mut vertices1: [(f32, f32); 3];
+    let mut vertices2: [(f32, f32); 3];
     let mut map: Vec<Vec<char>>;
 
     loop {
         (x, y) = get_dimensions();
-        clipspace_vertices = transform_coord(clipspace_vertices);
-        vertices = convert_to_clipspace(x, y, clipspace_vertices);
+        triangle1_vertices = transform_coord(triangle1_vertices);
+        vertices1 = convert_to_clipspace(x, y, triangle1_vertices);
+
+        triangle2_vertices = transform_coord(triangle2_vertices);
+        vertices2 = convert_to_clipspace(x, y, triangle2_vertices);
 
         map = create_map(x, y);
 
-        map = rasterise(map, vertices);
+        map = rasterise(map, vertices1);
+        map = rasterise(map, vertices2);
         print!("{}{}", Hide, Goto(1, 1));
         render(&map);
     }
@@ -79,7 +86,6 @@ fn rasterise(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
                     _ => {}
                 }
             }
-
             if count == 3 {
                 map[l][p] = OTHER_THING;
             }
@@ -89,10 +95,13 @@ fn rasterise(mut map: Vec<Vec<char>>, vertices: [(f32, f32); 3]) -> Vec<Vec<char
 }
 
 fn transform_coord(mut vertices: [(f32, f32); 3]) -> [(f32, f32); 3] {
-    let rot_point: (f32, f32) = (0.5, 0.5);
+    let rot_point: (f32, f32) = (
+        ((vertices[0].0 + vertices[1].0 + vertices[2].0) / 3.0),
+        ((vertices[0].1 + vertices[1].1 + vertices[2].1) / 3.0),
+    );
     let mut i = 0;
     for coord in vertices {
-        let deg: f32 = 0.000698;
+        let deg: f32 = 0.00698;
         let initial_coord: (f32, f32) = (coord.0 - rot_point.0, coord.1 - rot_point.1);
         let mut final_coord: (f32, f32) = (
             (initial_coord.0 * deg.cos() + initial_coord.1 * -deg.sin()),
